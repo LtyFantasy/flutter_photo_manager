@@ -15,6 +15,11 @@
   NSMutableArray *data = [NSMutableArray new];
 
   for (PMAssetPathEntity *entity in array) {
+      
+    if (entity.id == nil || entity.name == nil) {
+        continue;
+    }
+      
     NSDictionary *item = @{
             @"id": entity.id,
             @"name": entity.name,
