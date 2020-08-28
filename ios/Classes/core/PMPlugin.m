@@ -11,20 +11,26 @@
 #import "PMNotificationManager.h"
 #import "ResultHandler.h"
 
+@interface PMPlugin()
+
+@property (nonatomic, strong) FlutterMethodChannel *methodChannel;
+
+@end
+
 @implementation PMPlugin {
 }
 
 - (void)registerPlugin:(NSObject <FlutterPluginRegistrar> *)registrar {
   [self initNotificationManager:registrar];
 
-  FlutterMethodChannel *channel =
-          [FlutterMethodChannel methodChannelWithName:@"top.kikt/photo_manager"
+  _methodChannel = [FlutterMethodChannel methodChannelWithName:@"top.kikt/photo_manager"
                                       binaryMessenger:[registrar messenger]];
-  [self setManager:[PMManager new]];
-  [channel
-          setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
-              [self onMethodCall:call result:result];
-          }];
+    [self setManager:[PMManager new]];
+    
+    __weak PMPlugin *weakSelf = self;
+    [_methodChannel setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
+      [weakSelf onMethodCall:call result:result];
+    }];
 }
 
 - (void)initNotificationManager:(NSObject <FlutterPluginRegistrar> *)registrar {
@@ -69,9 +75,12 @@
 }
 
 - (void)onAuth:(FlutterMethodCall *)call result:(FlutterResult)result {
+    
   ResultHandler *handler = [ResultHandler handlerWithResult:result];
   PMManager *manager = self.manager;
   __block PMNotificationManager *notificationManager = self.notificationManager;
+    
+    __weak PMPlugin *weakSelf = self;
 
   [self runInBackground:^{
       if ([call.method isEqualToString:@"getGalleryList"]) {
@@ -122,10 +131,25 @@
         [manager getThumbWithId:id width:width height:height format:format quality:quality resultHandler:handler];
 
       } else if ([call.method isEqualToString:@"getFullFile"]) {
+          
         NSString *id = call.arguments[@"id"];
         BOOL isOrigin = [call.arguments[@"isOrigin"] boolValue];
 
-        [manager getFullSizeFileWithId:id isOrigin:isOrigin resultHandler:handler];
+          
+          [manager getFullSizeFileWithId:id
+                                isOrigin:isOrigin
+                           resultHandler:handler
+                downloadProgressCallback:^(NSString *assetId, float progress) {
+              
+              // 资源文件下载进度回调
+              if (assetId != nil) {
+                  
+                  [weakSelf.methodChannel invokeMethod:@"CloudPhotoDownloadProgress" arguments:@{
+                      @"assetId": assetId,
+                      @"progress": @(progress)
+                  }];
+              }
+          }];
 
       } else if ([call.method isEqualToString:@"releaseMemCache"]) {
         [manager clearCache];

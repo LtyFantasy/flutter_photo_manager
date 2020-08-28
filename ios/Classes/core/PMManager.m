@@ -342,9 +342,11 @@
                   }];
 }
 
+#warning todo
 - (void)getFullSizeFileWithId:(NSString *)id
                      isOrigin:(BOOL)isOrigin
-                resultHandler:(ResultHandler *)handler {
+                resultHandler:(ResultHandler *)handler
+     downloadProgressCallback:(void(^)(NSString *assetId, float progress))downloadCallback {
   PMAssetEntity *entity = [self getAssetEntity:id];
   if (entity && entity.phAsset) {
     PHAsset *asset = entity.phAsset;
@@ -359,7 +361,7 @@
       if (isOrigin) {
         [self fetchOriginImageFile:asset resultHandler:handler];
       } else {
-        [self fetchFullSizeImageFile:asset resultHandler:handler];
+        [self fetchFullSizeImageFile:asset resultHandler:handler downloadProgressCallback:downloadCallback];
       }
     }
   } else {
@@ -490,8 +492,11 @@
   return path;
 }
 
+#warning need todo
 - (void)fetchFullSizeImageFile:(PHAsset *)asset
-                 resultHandler:(ResultHandler *)handler {
+                 resultHandler:(ResultHandler *)handler
+      downloadProgressCallback:(void(^)(NSString *assetId, float progress))downloadCallback {
+    
   PHImageManager *manager = PHImageManager.defaultManager;
   PHImageRequestOptions *options = [PHImageRequestOptions new];
   options.synchronous = YES;
@@ -500,8 +505,13 @@
   [options setNetworkAccessAllowed:YES];
   [options setProgressHandler:^(double progress, NSError *error, BOOL *stop,
           NSDictionary *info) {
+      
+      if (downloadCallback) {
+          downloadCallback(asset.localIdentifier, progress);
+      }
+      
       if (progress == 1.0) {
-        [self fetchFullSizeImageFile:asset resultHandler:handler];
+        [self fetchFullSizeImageFile:asset resultHandler:handler downloadProgressCallback:downloadCallback];
       }
   }];
 

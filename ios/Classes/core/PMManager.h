@@ -36,7 +36,8 @@ typedef void (^AssetResult)(PMAssetEntity *);
 
 - (void)getFullSizeFileWithId:(NSString *)id
                      isOrigin:(BOOL)isOrigin
-                resultHandler:(ResultHandler *)handler;
+                resultHandler:(ResultHandler *)handler
+     downloadProgressCallback:(void(^)(NSString *assetId, float progress))downloadCallback;
 
 - (PMAssetPathEntity *)fetchPathProperties:(NSString *)id type:(int)type filterOption:(PMFilterOptionGroup *)filterOption;
 

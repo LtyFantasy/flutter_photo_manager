@@ -7,15 +7,42 @@ import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager/src/utils/convert_utils.dart';
 
+/// Download from cloud, progress callback
+typedef AssetDownloadProgressCallback = void Function(String assetId, double progress);
+
 class Plugin with BasePlugin, IosPlugin, AndroidPlugin {
   static Plugin _plugin;
+
+  AssetDownloadProgressCallback _downloadProgressCallback;
 
   factory Plugin() {
     _plugin ??= Plugin._();
     return _plugin;
   }
 
-  Plugin._();
+  Plugin._() {
+  
+    /// 初始化设置native层的call回调
+    _channel.setMethodCallHandler((MethodCall methodCall) {
+      return nativeCallHandler(methodCall);
+    });
+  }
+  
+  /// Native Call Handler
+  Future<dynamic> nativeCallHandler(MethodCall methodCall) async {
+    
+    if (methodCall.method == 'CloudPhotoDownloadProgress') {
+      if (_downloadProgressCallback != null && methodCall.arguments is Map) {
+        Map arguments = methodCall.arguments;
+        _downloadProgressCallback(arguments['assetId'], arguments['progress']);
+      }
+    }
+  }
+  
+  /// 设置图片下载回调
+  void setupDownloadCallback(AssetDownloadProgressCallback callback) {
+    _downloadProgressCallback = callback;
+  }
 
   /// [type] 0 : all , 1: image ,2 video
   Future<List<AssetPathEntity>> getAllGalleryList({

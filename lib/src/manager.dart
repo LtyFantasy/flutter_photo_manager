@@ -14,6 +14,11 @@ class PhotoManager {
   }
 
   static Editor editor = Editor();
+  
+  /// 设置云资源下载进度回调
+  static setupDownloadProgressCallback(AssetDownloadProgressCallback callback) {
+    _plugin.setupDownloadCallback(callback);
+  }
 
   /// get gallery list
   ///
