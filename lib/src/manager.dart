@@ -280,7 +280,8 @@ class PhotoManager {
       ..typeInt = asset.typeInt
       ..longitude = asset.longitude
       ..latitude = asset.latitude
-      ..title = asset.title;
+      ..title = asset.title
+      ..inCloud = asset.inCloud;
 
     return src;
   }

@@ -349,6 +349,15 @@ class AssetEntity {
   ///
   /// API 28 or lower: it is `MediaStore.MediaColumns.DATA` parent path.
   String relativePath;
+  
+  /// 表征数据是否在云空间，而不是在本地
+  bool inCloud = false;
+  
+  /// 是否正在从Cloud下载中
+  bool inCloudDownloading = false;
+  
+  /// 下载进度0.0-1.0
+  double downloadProgress = 0;
 
   /// refreshProperties
   Future<AssetEntity> refreshProperties() async {

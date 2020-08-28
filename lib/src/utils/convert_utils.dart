@@ -43,7 +43,8 @@ class ConvertUtils {
         ..longitude = item["lng"]
         ..latitude = item["lat"]
         ..title = item["title"]
-        ..relativePath = item['relativePath'];
+        ..relativePath = item['relativePath']
+        ..inCloud = item['inCloud'];
 
       result.add(entity);
     }

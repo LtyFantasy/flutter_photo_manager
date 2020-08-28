@@ -102,6 +102,7 @@
           @"lng": @(asset.lng),
           @"lat": @(asset.lat),
           @"title": needTitle ? asset.title : @"",
+          @"inCloud": @(asset.inCloud),
   };
 }
 
