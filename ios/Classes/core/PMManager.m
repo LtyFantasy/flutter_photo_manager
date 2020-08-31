@@ -269,7 +269,6 @@
   entity.lng = asset.location.coordinate.longitude;
   entity.title = needTitle ? [asset title] : @"";
   entity.favorite = asset.isFavorite;
-  entity.inCloud = asset.sourceType == PHAssetSourceTypeCloudShared;
 
   return entity;
 }
@@ -492,7 +491,6 @@
   return path;
 }
 
-#warning need todo
 - (void)fetchFullSizeImageFile:(PHAsset *)asset
                  resultHandler:(ResultHandler *)handler
       downloadProgressCallback:(void(^)(NSString *assetId, float progress))downloadCallback {
@@ -521,20 +519,29 @@
                         options:options
                   resultHandler:^(UIImage *_Nullable image,
                           NSDictionary *_Nullable info) {
+      
+      NSError *error = info[PHImageErrorKey];
+      BOOL cancel = [info[PHImageCancelledKey] boolValue];
+      if (error != nil || cancel == YES) {
+          if ([handler isReplied] == NO) {
+            [handler reply:nil];
+          }
+          return;
+      }
 
-                      BOOL downloadFinished = [PMManager isDownloadFinish:info];
-                      if (!downloadFinished) {
-                        return;
-                      }
+      BOOL downloadFinished = [PMManager isDownloadFinish:info];
+      if (!downloadFinished) {
+        return;
+      }
 
-                      if ([handler isReplied]) {
-                        return;
-                      }
+      if ([handler isReplied]) {
+        return;
+      }
 
-                      NSString *path = [self writeFullFileWithAssetId:asset imageData:UIImageJPEGRepresentation(image, 1.0)];
+      NSString *path = [self writeFullFileWithAssetId:asset imageData:UIImageJPEGRepresentation(image, 1.0)];
 
-                      [handler reply:path];
-                  }];
+      [handler reply:path];
+  }];
 }
 
 - (NSString *)writeFullFileWithAssetId:(PHAsset *)asset imageData:(NSData *)imageData {

@@ -11,6 +11,5 @@
 @interface AssetEntity : NSObject
 
 @property(nonatomic,strong) PHAsset *asset;
-@property(nonatomic, assign) BOOL isCloud;
 
 @end

@@ -71,7 +71,7 @@
 }
 
 - (void)runInBackground:(dispatch_block_t)block {
-  dispatch_async(dispatch_get_global_queue(0, 0), block);
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), block);
 }
 
 - (void)onAuth:(FlutterMethodCall *)call result:(FlutterResult)result {
