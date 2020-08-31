@@ -497,7 +497,6 @@
     
   PHImageManager *manager = PHImageManager.defaultManager;
   PHImageRequestOptions *options = [PHImageRequestOptions new];
-  options.synchronous = YES;
   options.version = PHImageRequestOptionsVersionCurrent;
 
   [options setNetworkAccessAllowed:YES];
