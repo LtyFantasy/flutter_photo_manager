@@ -23,14 +23,13 @@
 - (void)registerPlugin:(NSObject <FlutterPluginRegistrar> *)registrar {
   [self initNotificationManager:registrar];
 
-  _methodChannel = [FlutterMethodChannel methodChannelWithName:@"top.kikt/photo_manager"
+  FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:@"top.kikt/photo_manager"
                                       binaryMessenger:[registrar messenger]];
     [self setManager:[PMManager new]];
-    
-    __weak PMPlugin *weakSelf = self;
-    [_methodChannel setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
-      [weakSelf onMethodCall:call result:result];
+    [channel setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
+      [self onMethodCall:call result:result];
     }];
+    _methodChannel = channel;
 }
 
 - (void)initNotificationManager:(NSObject <FlutterPluginRegistrar> *)registrar {
