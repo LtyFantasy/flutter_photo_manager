@@ -319,26 +319,43 @@
                     contentMode:PHImageContentModeAspectFill
                         options:options
                   resultHandler:^(UIImage *result, NSDictionary *info) {
-                      BOOL downloadFinished = [PMManager isDownloadFinish:info];
+      
+      
+      NSError *error = info[PHImageErrorKey];
+      BOOL cancel = [info[PHImageCancelledKey] boolValue];
+      if (error != nil || cancel == YES) {
+          if ([handler isReplied] == NO) {
+            [handler reply:nil];
+          }
+          return;
+      }
+      
+      BOOL downloadFinished = [PMManager isDownloadFinish:info];
 
-                      if (!downloadFinished) {
-                        return;
-                      }
+      if (!downloadFinished) {
+        return;
+      }
 
-                      if ([handler isReplied]) {
-                        return;
-                      }
-                      NSData *imageData;
-                      if (format == 1) {
-                        imageData = UIImagePNGRepresentation(result);
-                      } else {
-                        double qualityValue = (double) quality / 100.0;
-                        imageData = UIImageJPEGRepresentation(result, qualityValue);
-                      }
+      if ([handler isReplied]) {
+        return;
+      }
+      NSData *imageData;
+      if (format == 1) {
+        imageData = UIImagePNGRepresentation(result);
+      } else {
+        double qualityValue = (double) quality / 100.0;
+        imageData = UIImageJPEGRepresentation(result, qualityValue);
+      }
 
-                      FlutterStandardTypedData *data = [FlutterStandardTypedData typedDataWithBytes:imageData];
-                      [handler reply:data];
-                  }];
+      if (imageData && [imageData isKindOfClass:[NSData class]]) {
+          FlutterStandardTypedData *data = [FlutterStandardTypedData typedDataWithBytes:imageData];
+          [handler reply:data];
+      }
+      // Bugly崩溃显示，有个别手机读取相册里的图片，居然imageData是nil，导致发给flutter做类型转换时崩溃
+      else {
+          [handler reply:nil];
+      }
+  }];
 }
 
 #warning todo
